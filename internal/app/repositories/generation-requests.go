@@ -209,7 +209,7 @@ func (r *GenerationRequestRepository) UpdateDraftGenerationRequest(userId uint, 
 func (r *GenerationRequestRepository) CompleteGenerationRequest(generationRequestId uint, moderatorId uint, calculationFn func(avgVelocity float32, height uint16, alpha float32, power uint32, days uint) uint64) (ds.GenerationRequest, error) {
 	generationRequest, err := r.GetGenerationRequest(generationRequestId)
 	if err != nil {
-		return ds.GenerationRequest{}, nil
+		return ds.GenerationRequest{}, err
 	}
 	if generationRequest.Status != "sent" {
 		return ds.GenerationRequest{}, ErrorGenerationRequestCannotBeClosed
@@ -221,7 +221,6 @@ func (r *GenerationRequestRepository) CompleteGenerationRequest(generationReques
 	transaction := r.GenerationRequestDB.Begin()
 	transactionalService := NewGenerationRequestRepository(transaction)
 
-	updatedGenerationRequest := ds.GenerationRequest{}
 	now := time.Now()
 	if err := transaction.Where(&ds.GenerationRequest{
 		ID: generationRequestId,
@@ -229,8 +228,8 @@ func (r *GenerationRequestRepository) CompleteGenerationRequest(generationReques
 		Status:     "completed",
 		ClosedAt:   &now,
 		ClosedByID: &moderatorId,
-	}).Clauses(clause.Returning{}).Scan(&updatedGenerationRequest).Error; err != nil {
-		log.WithError(err).WithFields(log.Fields{"Generation Request ID": generationRequestId}).Error("Failed to delete draft generation request from DB")
+	}).Error; err != nil {
+		log.WithError(err).WithFields(log.Fields{"Generation Request ID": generationRequestId}).Error("Failed to update generation request in DB")
 		transaction.Rollback()
 		return ds.GenerationRequest{}, err
 	}
@@ -256,13 +255,14 @@ func (r *GenerationRequestRepository) CompleteGenerationRequest(generationReques
 		}).Updates(&ds.TurbineGenerationRequest{
 			CalculatedGeneration: &calculatedGeneration,
 		}).Error; err != nil {
+			log.WithError(err).WithFields(log.Fields{"Generation Request ID": generationRequestId}).Error("Failed to fill calculated generation in DB")
 			transaction.Rollback()
 			return ds.GenerationRequest{}, err
 		}
 	}
 
 	transaction.Commit()
-	return updatedGenerationRequest, nil
+	return r.GetGenerationRequest(generationRequestId)
 }
 
 func (r *GenerationRequestRepository) RejectGenerationRequest(generationRequestId uint, moderatorId uint) (ds.GenerationRequest, error) {
@@ -274,7 +274,6 @@ func (r *GenerationRequestRepository) RejectGenerationRequest(generationRequestI
 		return ds.GenerationRequest{}, ErrorGenerationRequestCannotBeClosed
 	}
 
-	updatedGenerationRequest := ds.GenerationRequest{}
 	now := time.Now()
 	if err := r.GenerationRequestDB.Where(&ds.GenerationRequest{
 		ID: generationRequestId,
@@ -282,11 +281,11 @@ func (r *GenerationRequestRepository) RejectGenerationRequest(generationRequestI
 		Status:     "rejected",
 		ClosedAt:   &now,
 		ClosedByID: &moderatorId,
-	}).Clauses(clause.Returning{}).Scan(&updatedGenerationRequest).Error; err != nil {
+	}).Error; err != nil {
 		log.WithError(err).WithFields(log.Fields{"Generation Request ID": generationRequestId}).Error("Failed to delete draft generation request from DB")
 		return ds.GenerationRequest{}, err
 	}
-	return updatedGenerationRequest, nil
+	return r.GetGenerationRequest(generationRequestId)
 }
 
 func (r *GenerationRequestRepository) GetDraftGenerationRequest(userId uint) (ds.GenerationRequest, error) {
