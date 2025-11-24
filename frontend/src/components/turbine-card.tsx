@@ -8,14 +8,12 @@ import defaultImage from "../assets/default.jpg";
 export const TurbineCard = (turbine: Turbine) => (
     <Card
         style={{
-            maxWidth: 380,
-            minWidth: 330,
             backgroundColor: "#F5F7F7",
             border: "none",
         }}
     >
         <Card.Img
-            style={{ height: 220, objectFit: "cover" }}
+            style={{ height: 250, objectFit: "cover", objectPosition: "top" }}
             variant="top"
             src={turbine.image || defaultImage}
             alt={`Фото ${turbine.title}`} />

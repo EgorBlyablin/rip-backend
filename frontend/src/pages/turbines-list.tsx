@@ -9,6 +9,8 @@ import { ROUTE_LABELS, ROUTES } from "../routes";
 import type { Turbine } from "../api/interfaces";
 import { fetchRequestStats } from "../api/generation-requests";
 
+import CalculatorIcon from "../assets/calculator.svg?react";
+
 export const TurbinesListPage: FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -52,30 +54,34 @@ export const TurbinesListPage: FC = () => {
                     { label: ROUTE_LABELS.TURBINES_LIST, path: ROUTES.TURBINES_LIST },
                 ]}
             />
-            <div
+            <Row
                 style={{
                     display: "flex",
-                    justifyContent: "space-between",
-                    paddingBlock: 18,
+                    gap: 16,
+                    justifyContent: "space-between"
                 }}
+                className="p-2 mb-1"
             >
-                <h1
-                    style={{
-                        textTransform: "uppercase",
-                        fontWeight: "bold",
-                        color: "#5B5B5B",
-                        alignSelf: "center"
-                    }}
-                >
-                    Ветрогенераторы
-                    {titleFilter && <> (поиск: "{titleFilter}")</>} {/* Use titleFilter here too */}
-                </h1>
-                <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <Col md={"auto"} xs={12}>
+                    <h1
+                        style={{
+                            textTransform: "uppercase",
+                            fontWeight: "bold",
+                            color: "#5B5B5B",
+                            lineHeight: 1,
+                            margin: 0
+                        }}
+                        >
+                        Ветрогенераторы
+                        {titleFilter && <> (поиск: "{titleFilter}")</>} {/* Use titleFilter here too */}
+                    </h1>
+                </Col>
+                <Col md={"auto"} style={{ display: "flex", gap: 10, alignItems: "center" }}>
                     <Button
                         variant="secondary"
-                        style={{ textWrap: "nowrap", fontSize: "1.5rem", paddingBlock: 0, marginRight: "0.5rem" }}
+                        style={{ textWrap: "nowrap", fontSize: "1.5rem", height: "36px", marginRight: "0.5rem", display: "flex", alignItems: "center" }}
                     >
-                        🖩 <span style={{
+                        <CalculatorIcon width={"25px"} /> <span style={{
                             position: "absolute",
                             background: "white",
                             color: "black",
@@ -84,6 +90,7 @@ export const TurbinesListPage: FC = () => {
                             padding: "0.05rem 0.5rem",
                             lineHeight: 1,
                             fontSize: "0.7rem",
+                            transform: "translate(100%, -100%)"
                         }}>{cartCount}</span>
                     </Button>
                     <Form onSubmit={handleSearchSubmit}>
@@ -100,11 +107,11 @@ export const TurbinesListPage: FC = () => {
                             </Button>
                         </InputGroup>
                     </Form>
-                </div>
-            </div>
-            <Row className="row-gap-4">
+                </Col>
+            </Row>
+            <Row>
                 {(turbines || []).map((turbine) => (
-                    <Col key={turbine.id}>
+                    <Col key={turbine.id} className="p-2" xxl={3} lg={4} sm={6} xs={12}>
                         <TurbineCard {...turbine} />
                     </Col>
                 ))

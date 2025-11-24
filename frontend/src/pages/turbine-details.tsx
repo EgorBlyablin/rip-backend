@@ -31,20 +31,22 @@ export const TurbineDetailsPage: FC = () => {
                         { label: turbine.title, path: "" }
                     ]} />
                     <Row style={{ backgroundColor: "#F5F7F7", border: "none", borderRadius: "6px", overflow: "hidden" }}>
-                        <Col sm={4} className="p-0 m-0">
-                            <Image fluid src={turbine.image || defaultImage} alt={`Изображение ${turbine.title}`} />
-                            <div className="p-4">
-                                <div className="d-flex align-items-center mb-2">
-                                    <span className="me-2 fw-bold">Максимальная мощность:</span>
-                                    <span className="flex-grow-1 border-bottom  border-dotted"></span>
-                                    <span className="ms-2">{(turbine.power / 1000).toPrecision(2)} кВт</span>
+                        <Col xxl={3} lg={4} md={6} xs={12} className="p-0 m-0">
+                            <Row>
+                                <Image fluid src={turbine.image || defaultImage} alt={`Изображение ${turbine.title}`} />
+                                <div style={{ padding: 36 }}>
+                                    <div className="d-flex align-items-center mb-2">
+                                        <span className="me-2 fw-bold">Максимальная мощность:</span>
+                                        <span className="flex-grow-1 border-bottom  border-dotted"></span>
+                                        <span className="ms-2">{(turbine.power / 1000).toPrecision(2)} кВт</span>
+                                    </div>
+                                    <div className="d-flex align-items-center">
+                                        <span className="me-2 fw-bold">Высота мачты:</span>
+                                        <span className="flex-grow-1 border-bottom border-dotted"></span>
+                                        <span className="ms-2">{turbine.height} м</span>
+                                    </div>
                                 </div>
-                                <div className="d-flex align-items-center">
-                                    <span className="me-2 fw-bold">Высота мачты:</span>
-                                    <span className="flex-grow-1 border-bottom border-dotted"></span>
-                                    <span className="ms-2">{turbine.height} м</span>
-                                </div>
-                            </div>
+                            </Row>
                         </Col>
                         <Col sm className="right-column p-4">
                             <h1 style={{ textTransform: "uppercase", fontWeight: "bold", color: "#5B5B5B" }}>{turbine.title}</h1>
