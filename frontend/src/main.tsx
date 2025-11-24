@@ -9,19 +9,23 @@ import { TurbinesListPage } from './pages/turbines-list'
 import { TurbineDetailsPage } from './pages/turbine-details'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { ROUTES } from './routes'
+import { Provider } from 'react-redux'
+import store from './store'
 
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter basename='/RIP/'>
-      <Routes>
-        <Route path={ROUTES.HOME} element={<MainPage />} />
-        <Route path={ROUTES.TURBINES_LIST} element={<Layout />}>
-          <Route index element={<TurbinesListPage />} />
-          <Route path=":turbineId" element={<TurbineDetailsPage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <Provider store={store}>
+      <BrowserRouter basename='/RIP/'>
+        <Routes>
+          <Route path={ROUTES.HOME} element={<MainPage />} />
+          <Route path={ROUTES.TURBINES_LIST} element={<Layout />}>
+            <Route index element={<TurbinesListPage />} />
+            <Route path=":turbineId" element={<TurbineDetailsPage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </Provider>
   </StrictMode>,
 )
 

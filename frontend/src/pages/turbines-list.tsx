@@ -1,6 +1,6 @@
 import { useEffect, useState, type FC, type FormEvent } from "react";
 import { Button, Col, Container, Form, InputGroup, Row } from "react-bootstrap";
-import { useSearchParams } from "react-router";
+import { useDispatch } from "react-redux";
 import { fetchTurbines } from "../api/turbines";
 import SearchIcon from "../assets/search.svg?react";
 import { Breadcrumbs } from "../components/breadcrumbs";
@@ -8,15 +8,14 @@ import { TurbineCard } from "../components/turbine-card";
 import { ROUTE_LABELS, ROUTES } from "../routes";
 import type { Turbine } from "../api/interfaces";
 import { fetchRequestStats } from "../api/generation-requests";
+import { useTurbinesFilter, setTurbinesFilter } from "../api/turbines";
 
 import CalculatorIcon from "../assets/calculator.svg?react";
 
 export const TurbinesListPage: FC = () => {
-    const [searchParams, setSearchParams] = useSearchParams();
+    const dispatch = useDispatch();
 
-    // Get initial search query from URL
-    const titleFilter = searchParams.get("title-filter") || "";
-    const [searchValue, setSearchValue] = useState(titleFilter);
+    const turbinesFilter = useTurbinesFilter();
     const [turbines, setTurbines] = useState<Turbine[]>([]);
     const [cartCount, setCartCount] = useState(0);
 
@@ -26,24 +25,18 @@ export const TurbinesListPage: FC = () => {
 
     useEffect(() => {
         const fetchTurbinesWrapper = async () => {
-            const turbinesData = await fetchTurbines(titleFilter);
-            setTurbines(turbinesData || []);
+            const turbinesData = await fetchTurbines(turbinesFilter);
+            setTurbines(turbinesData);
         };
 
         fetchTurbinesWrapper();
-    }, [titleFilter]);
+    }, [turbinesFilter]);
 
     // Handle form submission for search
-    const handleSearchSubmit = (e: FormEvent) => {
+    const handleSearchSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const params = new URLSearchParams(searchParams);
-        if (searchValue.trim()) {
-            params.set("title-filter", searchValue.trim());
-        } else {
-            params.delete("title-filter");
-        }
-        setSearchParams(params);
+        dispatch(setTurbinesFilter((e.currentTarget.elements.namedItem("title-filter") as HTMLInputElement).value));
     };
 
     return (
@@ -73,7 +66,7 @@ export const TurbinesListPage: FC = () => {
                         }}
                         >
                         Ветрогенераторы
-                        {titleFilter && <> (поиск: "{titleFilter}")</>} {/* Use titleFilter here too */}
+                        {turbinesFilter && <> (поиск: "{turbinesFilter}")</>} {/* Use turbinesFilter here too */}
                     </h1>
                 </Col>
                 <Col md={"auto"} style={{ display: "flex", gap: 10, alignItems: "center" }}>
@@ -98,8 +91,7 @@ export const TurbinesListPage: FC = () => {
                             <Form.Control
                                 name="title-filter"
                                 placeholder="Поиск"
-                                value={searchValue}
-                                onChange={({ currentTarget: { value } }) => setSearchValue(value)}
+                                defaultValue={turbinesFilter}
                                 maxLength={20}
                             />
                             <Button type="submit" style={{ display: "flex", alignItems: "center", backgroundColor: "#5BA1D4", border: "none" }}>

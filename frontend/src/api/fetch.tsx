@@ -1,8 +1,8 @@
 const API_PREFIX = "/api"
 
-export async function fetchFromAPI<T>(url: string, mock: T | null): Promise<T | null> {
+export async function fetchFromAPI<T>(url: string, mock: T): Promise<T> {
     const response = await fetch(`${API_PREFIX}${url}`);
-        
+
     if (!response.ok) {
         console.error(`Fetch error (${response.status}), using mock...`);
         return mock;
