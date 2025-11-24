@@ -1,4 +1,5 @@
 import { Button, Card } from "react-bootstrap";
+import { useHref } from "react-router";
 import type { Turbine } from "../api/interfaces";
 
 import defaultImage from "../assets/default.jpg";
@@ -43,7 +44,7 @@ export const TurbineCard = (turbine: Turbine) => (
                 </div>
             </div>
             <Button
-                href={`/turbines/${turbine.id}`}
+                href={useHref(`/turbines/${turbine.id}`)}
                 style={{
                     padding: "12px 30px",
                     color: "white",
@@ -56,4 +57,4 @@ export const TurbineCard = (turbine: Turbine) => (
             </Button>
         </Card.Body>
     </Card>
-)
+);

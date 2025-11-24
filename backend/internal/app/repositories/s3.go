@@ -11,7 +11,7 @@ import (
 )
 
 type S3Repository struct {
-	s3     *minio.Client
+	S3     *minio.Client
 	bucket string
 }
 
@@ -34,11 +34,11 @@ func NewS3Repository(host string, port int, bucket string) (*S3Repository, error
 		}
 	}
 
-	return &S3Repository{s3: client, bucket: bucket}, nil
+	return &S3Repository{S3: client, bucket: bucket}, nil
 }
 
 func (r *S3Repository) UploadFile(key string, body io.Reader, imageSize int64, contentType string) (string, error) {
-	uploadInfo, err := r.s3.PutObject(context.Background(), r.bucket, key, body, imageSize, minio.PutObjectOptions{
+	uploadInfo, err := r.S3.PutObject(context.Background(), r.bucket, key, body, imageSize, minio.PutObjectOptions{
 		ContentType: contentType,
 	})
 
@@ -53,7 +53,7 @@ func (r *S3Repository) UploadFile(key string, body io.Reader, imageSize int64, c
 }
 
 func (r *S3Repository) DeleteFile(key string) error {
-	if err := r.s3.RemoveObject(context.Background(), r.bucket, key, minio.RemoveObjectOptions{}); err != nil {
+	if err := r.S3.RemoveObject(context.Background(), r.bucket, key, minio.RemoveObjectOptions{}); err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"Bucket": r.bucket,
 			"Key":    key,

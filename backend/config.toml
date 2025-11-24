@@ -1,3 +1,6 @@
+[Public]
+Host = "192.168.1.150"
+
 [Service]
 Host = "0.0.0.0"
 Port = 8000

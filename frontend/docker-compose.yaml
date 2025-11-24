@@ -12,8 +12,8 @@ services:
       watch:
         - path: ./package-lock.json
           action: rebuild
-        - path: ./vite.config.ts
-          target: /app/vite.config.ts
+        - path: .
+          target: /app
           action: sync
 
 

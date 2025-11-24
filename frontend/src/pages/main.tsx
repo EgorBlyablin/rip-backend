@@ -15,9 +15,9 @@ export const MainPage = () => {
                     playsInline
                     className="position-absolute top-0 start-0 w-100 h-100"
                     style={{ objectFit: "cover", zIndex: -2 }}
-                    poster="/first-frame.webp" // Optional fallback
+                    poster={`${import.meta.env.BASE_URL}first-frame.webp`} // Optional fallback
                 >
-                    <source src="/video.webm" type="video/webm" />
+                    <source src={`${import.meta.env.BASE_URL}video.webm`} type="video/webm" />
                 </video>
 
                 {/* Dark Overlay for Better Text Contrast */}

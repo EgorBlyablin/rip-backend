@@ -11,6 +11,10 @@ import (
 )
 
 type Config struct {
+	Public struct {
+		Host string
+	}
+
 	Service struct {
 		Host string
 		Port int
@@ -74,7 +78,7 @@ func NewConfig() (*Config, error) {
 	cfg.Redis.Password = os.Getenv(envRedisPass)
 	cfg.Redis.User = os.Getenv(envRedisUser)
 
-	log.Error("config parsed")
+	log.Info("config parsed")
 
 	return cfg, nil
 }

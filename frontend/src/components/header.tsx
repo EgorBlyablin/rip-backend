@@ -1,7 +1,8 @@
 import type { FC } from "react"
 import { Container, Nav, Navbar } from "react-bootstrap"
+import { NavLink } from "react-router"
 
-export const Header: FC<{ mode: "normal" | "main-page" }> = ({ mode = "normal" }) => (
+export const Header: FC<{ mode?: "normal" | "main-page" }> = ({ mode = "normal" }) => (
     <header style={{
         borderBottom: mode === "normal" ? "5px solid #5BA1D4" : undefined,
         marginBottom: 24
@@ -17,13 +18,14 @@ export const Header: FC<{ mode: "normal" | "main-page" }> = ({ mode = "normal" }
                 <Navbar.Toggle aria-controls="navbar" />
                 <Navbar.Collapse id="navbar" style={{ justifyContent: "end" }}>
                     <Nav style={{ alignItems: "center", gap: 20 }}>
-                        <Nav.Link href={"/turbines"} style={{ color: mode === "normal" ? "black" : "white" }}>Ветрогенераторы</Nav.Link>
-                        <Nav.Link href={"/"} style={{
+                        <NavLink to={"/turbines"} style={{ color: mode === "normal" ? "black" : "white", textDecoration: "none" }}>Ветрогенераторы</NavLink>
+                        <NavLink to={"/"} style={{
                             padding: "12px 30px",
                             color: "white",
                             backgroundColor: "#5BA1D4",
-                            borderRadius: 6
-                        }}>Домой</Nav.Link>
+                            borderRadius: 6,
+                            textDecoration: "none"
+                        }}>Домой</NavLink>
                     </Nav>
                 </Navbar.Collapse>
             </Container>

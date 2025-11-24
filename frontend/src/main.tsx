@@ -1,6 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Route, Routes } from 'react-router'
+import {registerSW} from "virtual:pwa-register"
 
 import { MainPage } from './pages/main'
 import { Layout } from './components/layout'
@@ -12,7 +13,7 @@ import { ROUTES } from './routes'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename='/RIP/'>
       <Routes>
         <Route path={ROUTES.HOME} element={<MainPage />} />
         <Route path={ROUTES.TURBINES_LIST} element={<Layout />}>
@@ -23,3 +24,7 @@ createRoot(document.getElementById('root')!).render(
     </BrowserRouter>
   </StrictMode>,
 )
+
+if ("serviceWorker" in navigator) {
+  registerSW()
+}
