@@ -11,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	log "github.com/sirupsen/logrus"
 )
 
 type GenerationRequestsApi struct {
@@ -28,7 +29,7 @@ func (a *GenerationRequestsApi) RegisterEndpoints(r *gin.RouterGroup, m *middlew
 	r.GET("/:generationRequestId", m.WithAuth, a.GetGenerationRequest)
 	r.PUT("/:generationRequestId/close", m.WithModeratorAccess, a.CloseGenerationRequest)
 
-	r.GET("/draft", m.WithAuth, a.GetDraftBriefInfo)
+	r.GET("/draft", m.WithOptionalAuth, a.GetDraftBriefInfo)
 	r.POST("/draft/:turbineId", m.WithAuth, a.AddTurbineToDraft)
 	r.PUT("/draft", m.WithAuth, a.UpdateDraftGenerationRequest)
 	r.PUT("/draft/:turbineId", m.WithAuth, a.UpdateTurbineInDraft)
@@ -84,8 +85,10 @@ func (a *GenerationRequestsApi) GetSentGenerationRequests(ctx *gin.Context) {
 	}
 
 	for i := range generationRequests {
-		grCount := uint(len(*generationRequests[i].TurbineGenerationRequests))
-		generationRequests[i].TurbineGenerationRequestsCount = &grCount
+		if generationRequests[i].Status == "completed" {
+			counter := uint(len(*generationRequests[i].TurbineGenerationRequests))
+			generationRequests[i].TurbineGenerationRequestsCount = &counter
+		}
 		generationRequests[i].TurbineGenerationRequests = nil
 	}
 
@@ -129,12 +132,13 @@ func (a *GenerationRequestsApi) GetGenerationRequest(ctx *gin.Context) {
 	}
 
 	if generationRequest.CreatedByID != userId {
-		ctx.AbortWithStatus(http.StatusForbidden)
-		return
+		isModerator, err := GetIsModerator(ctx)
+		if err != nil || !isModerator {
+			log.Error("User tried to access a generation request that does not belong to them")
+			ctx.AbortWithStatus(http.StatusForbidden)
+			return
+		}
 	}
-
-	grCount := uint(len(*generationRequest.TurbineGenerationRequests))
-	generationRequest.TurbineGenerationRequestsCount = &grCount
 
 	ctx.JSON(http.StatusOK, generationRequest)
 }
@@ -201,15 +205,16 @@ func (a *GenerationRequestsApi) CloseGenerationRequest(ctx *gin.Context) {
 // @Tags Заявки расчета выработки
 // @Accept json
 // @Produce json
-// @Success 200 {object} ds.GenerationRequest "Информация о черновике"
-// @Failure 401 {object} map[string]string "Пользователь не авторизован"
+// @Success 200 {object} ds.DraftGenerationRequestsBriefInfo "Информация о черновике"
 // @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
-// @Security JWT
 // @Router /api/generation-requests/draft/ [get]
 func (a *GenerationRequestsApi) GetDraftBriefInfo(ctx *gin.Context) {
 	userId, err := GetUserID(ctx)
 	if err != nil {
-		ctx.AbortWithStatusJSON(http.StatusInternalServerError, err)
+		ctx.AbortWithStatusJSON(http.StatusOK, ds.DraftGenerationRequestsBriefInfo{
+			GenerationRequestId: 0,
+			TurbinesCount:       0,
+		})
 		return
 	}
 

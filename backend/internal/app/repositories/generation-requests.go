@@ -88,9 +88,8 @@ func (r *GenerationRequestRepository) GetGenerationRequest(generationRequestId u
 	}
 
 	counter := uint(0)
-	generationRequest.TurbineGenerationRequestsCount = &counter
 
-	if generationRequest.TurbineGenerationRequests != nil && len(*generationRequest.TurbineGenerationRequests) > 0 {
+	if generationRequest.Status == "completed" && generationRequest.TurbineGenerationRequests != nil && (len(*generationRequest.TurbineGenerationRequests) > 0) {
 		generationSum := uint64(0)
 		for _, turbine := range *generationRequest.TurbineGenerationRequests {
 			counter += 1

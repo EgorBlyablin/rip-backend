@@ -28,7 +28,7 @@ func NewS3Repository(host string, port int, bucket string) (*S3Repository, error
 		return nil, err
 	}
 	if !bucketExists {
-		log.Infof("Bucket %s does not exist, creating it", bucket)
+		log.Errorf("Bucket %s does not exist, creating it", bucket)
 		if err := client.MakeBucket(context.Background(), bucket, minio.MakeBucketOptions{}); err != nil {
 			return nil, err
 		}

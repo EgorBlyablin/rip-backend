@@ -74,7 +74,7 @@ func NewConfig() (*Config, error) {
 	cfg.Redis.Password = os.Getenv(envRedisPass)
 	cfg.Redis.User = os.Getenv(envRedisUser)
 
-	log.Info("config parsed")
+	log.Error("config parsed")
 
 	return cfg, nil
 }

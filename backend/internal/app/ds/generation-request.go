@@ -27,6 +27,7 @@ type GenerationRequest struct {
 	CalculatedGenerationSum        *uint64                     `json:"calculated_generation_sum,omitempty"`
 }
 
+
 func (generationRequest GenerationRequest) MarshalJSON() ([]byte, error) {
 	type Alias GenerationRequest
 

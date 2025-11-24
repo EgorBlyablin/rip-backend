@@ -9,6 +9,6 @@ export interface Turbine {
 }
 
 export interface GenerationRequestDraftStats {
-    id: number;
-    turbinesCount: number;
+    GenerationRequestId: number;
+    TurbinesCount: number;
 }

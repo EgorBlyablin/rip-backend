@@ -7,15 +7,20 @@ import { Breadcrumbs } from "../components/breadcrumbs";
 import { TurbineCard } from "../components/turbine-card";
 import { ROUTE_LABELS, ROUTES } from "../routes";
 import type { Turbine } from "../api/interfaces";
+import { fetchRequestStats } from "../api/generation-requests";
 
 export const TurbinesListPage: FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
 
-    const generationRequest = { id: 0, turbinesCount: 0 };
     // Get initial search query from URL
     const titleFilter = searchParams.get("title-filter") || "";
     const [searchValue, setSearchValue] = useState(titleFilter);
     const [turbines, setTurbines] = useState<Turbine[]>([]);
+    const [cartCount, setCartCount] = useState(0);
+
+    useEffect(() => {
+        fetchRequestStats().then(stats => stats && setCartCount(stats.TurbinesCount));
+    }, []);
 
     useEffect(() => {
         const fetchTurbinesWrapper = async () => {
@@ -25,7 +30,6 @@ export const TurbinesListPage: FC = () => {
 
         fetchTurbinesWrapper();
     }, [titleFilter]);
-
 
     // Handle form submission for search
     const handleSearchSubmit = (e: FormEvent) => {
@@ -68,11 +72,19 @@ export const TurbinesListPage: FC = () => {
                 </h1>
                 <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                     <Button
-                        variant="dark"
-                        style={{ textWrap: "nowrap" }}
-                        disabled
+                        variant="secondary"
+                        style={{ textWrap: "nowrap", fontSize: "1.5rem", paddingBlock: 0, marginRight: "0.5rem" }}
                     >
-                        Расчет ({generationRequest.turbinesCount})
+                        🖩 <span style={{
+                            position: "absolute",
+                            background: "white",
+                            color: "black",
+                            borderRadius: "100rem",
+                            border: "1px solid black",
+                            padding: "0.05rem 0.5rem",
+                            lineHeight: 1,
+                            fontSize: "0.7rem",
+                        }}>{cartCount}</span>
                     </Button>
                     <Form onSubmit={handleSearchSubmit}>
                         <InputGroup>

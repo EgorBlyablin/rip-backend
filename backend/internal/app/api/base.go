@@ -56,3 +56,12 @@ func GetUserID(ctx *gin.Context) (uint, error) {
 
 	return userId.(uint), nil
 }
+
+func GetIsModerator(ctx *gin.Context) (bool, error) {
+	isModerator, exists := ctx.Get(ds.UserIsModeratorKey)
+	if !exists {
+		return false, fmt.Errorf("user claims expected but not found")
+	}
+
+	return isModerator.(bool), nil
+}
