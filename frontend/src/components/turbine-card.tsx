@@ -1,5 +1,5 @@
-import { Button, Card } from "react-bootstrap";
-import { useHref } from "react-router";
+import { Card } from "react-bootstrap";
+import { Link } from "react-router";
 import type { Turbine } from "../api/interfaces";
 
 import defaultImage from "../assets/default.jpg";
@@ -41,18 +41,21 @@ export const TurbineCard = (turbine: Turbine) => (
                     <span className="ms-2">{turbine.height} м</span>
                 </div>
             </div>
-            <Button
-                href={useHref(`/turbines/${turbine.id}`)}
+            <Link
+                to={`/turbines/${turbine.id}`}
                 style={{
                     padding: "12px 30px",
                     color: "white",
                     backgroundColor: "#5BA1D4",
                     textTransform: "uppercase",
                     border: "none",
+                    borderRadius: "6px",
+                    textDecoration: "none",
+                    display: "inline-block",
                 }}
             >
                 Подробнее
-            </Button>
+            </Link>
         </Card.Body>
     </Card>
 );
