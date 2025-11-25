@@ -1,3 +1,5 @@
+name: rip
+
 services:
   backend:
     build:

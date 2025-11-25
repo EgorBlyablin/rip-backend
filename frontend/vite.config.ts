@@ -8,14 +8,13 @@ import mkcert from 'vite-plugin-mkcert';
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/RIP/',
   server: {
     host: "0.0.0.0",
     port: 3000,
     strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://backend:8000',
+        target: 'http://192.168.1.150:8000',
         changeOrigin: true
       }
     },
@@ -30,9 +29,6 @@ export default defineConfig({
     mkcert(),
     VitePWA({
       registerType: 'autoUpdate',
-      devOptions: {
-        enabled: true,
-      },
       manifest: {
         "name": "VETRYAKI",
         "short_name": "VETRYAKI",

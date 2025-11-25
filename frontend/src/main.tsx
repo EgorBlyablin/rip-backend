@@ -16,7 +16,7 @@ import store from './store'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
-      <BrowserRouter basename='/RIP/'>
+      <BrowserRouter>
         <Routes>
           <Route path={ROUTES.HOME} element={<MainPage />} />
           <Route path={ROUTES.TURBINES_LIST} element={<Layout />}>

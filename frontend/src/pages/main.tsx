@@ -12,7 +12,7 @@ export const MainPage = () => {
                     autoPlay
                     muted
                     loop
-                    playsInline
+                    controls={undefined}
                     className="position-absolute top-0 start-0 w-100 h-100"
                     style={{ objectFit: "cover", zIndex: -2 }}
                     poster={`${import.meta.env.BASE_URL}first-frame.webp`} // Optional fallback
