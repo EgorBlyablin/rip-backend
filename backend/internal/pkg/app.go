@@ -30,7 +30,7 @@ func (a *TurbinesApplication) Run(config *config.Config, db *gorm.DB, redis *red
 	router.GET("/docs/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	serverAddress := fmt.Sprintf("%s:%d", config.Service.Host, config.Service.Port)
-	if err := engine.Run(serverAddress); err != nil {
+	if err := engine.RunTLS(serverAddress, "/app/cert.crt", "/app/cert.key"); err != nil {
 		logrus.Fatal(err)
 	}
 

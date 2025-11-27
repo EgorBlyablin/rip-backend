@@ -15,8 +15,6 @@ services:
       MINIO_SECRET_KEY: minioadmin
     volumes:
       - .:/app          # mount source code
-      - ./static:/app/static:ro
-      - ./templates:/app/templates:ro
     depends_on:
       postgres:
         condition: service_healthy
