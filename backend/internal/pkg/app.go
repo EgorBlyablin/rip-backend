@@ -2,11 +2,13 @@ package pkg
 
 import (
 	"fmt"
+	"time"
 
 	"rip/internal/app/api"
 	"rip/internal/app/config"
 	"rip/internal/app/redis"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
 	swaggerFiles "github.com/swaggo/files"
@@ -22,6 +24,19 @@ func (a *TurbinesApplication) Run(config *config.Config, db *gorm.DB, redis *red
 	logrus.Info("Server start up")
 
 	engine := gin.Default()
+
+	engine.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{
+			"https://egorblyablin.github.io",
+			"https://10.185.38.237:3000",
+			"https://localhost:3000",
+		},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
+
 	router := engine.Group("/api")
 
 	turbinesApi := api.NewTurbinesAppApi(config, db, redis)
