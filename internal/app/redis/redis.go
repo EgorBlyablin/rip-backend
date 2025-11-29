@@ -12,22 +12,22 @@ import (
 const servicePrefix = "turbines_api."
 
 type Client struct {
-	cfg    config.RedisConfig
+	cfg    config.Config
 	client *redis.Client
 }
 
-func New(ctx context.Context, cfg config.RedisConfig) (*Client, error) {
+func New(ctx context.Context, cfg config.Config) (*Client, error) {
 	client := &Client{}
 
 	client.cfg = cfg
 
 	redisClient := redis.NewClient(&redis.Options{
-		Password:    cfg.Password,
-		Username:    cfg.User,
-		Addr:        cfg.Host + ":" + strconv.Itoa(cfg.Port),
+		Password:    cfg.Redis.Password,
+		Username:    cfg.Redis.User,
+		Addr:        cfg.Redis.Host + ":" + strconv.Itoa(cfg.Redis.Port),
 		DB:          0,
-		DialTimeout: cfg.DialTimeout,
-		ReadTimeout: cfg.ReadTimeout,
+		DialTimeout: cfg.Redis.DialTimeout,
+		ReadTimeout: cfg.Redis.ReadTimeout,
 	})
 
 	client.client = redisClient

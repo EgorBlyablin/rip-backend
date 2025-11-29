@@ -1,2 +1,6 @@
+.gitignore
+
 docker-compose.yaml
 Dockerfile
+
+minio/

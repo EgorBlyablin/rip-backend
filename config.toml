@@ -15,5 +15,9 @@ SigningMethod = "HS256"
 ExpiresIn = "24h"
 
 [Redis]
+Host        = "redis"
+Password    = "password"
+Port        = 6379
+User        = ""
 DialTimeout = "10s"
 ReadTimeout = "10s"

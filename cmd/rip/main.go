@@ -39,7 +39,7 @@ func main() {
 	}
 
 	ctx := context.Background()
-	redisClient, err := redis.New(ctx, config.Redis)
+	redisClient, err := redis.New(ctx, *config)
 	if err != nil {
 		logrus.Fatalf("error initializing redis: %v", err)
 	}
