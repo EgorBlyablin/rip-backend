@@ -111,11 +111,6 @@ const docTemplate = `{
         },
         "/api/generation-requests/draft/": {
             "get": {
-                "security": [
-                    {
-                        "JWT": []
-                    }
-                ],
                 "description": "Возвращает информацию о черновике заявки текущего пользователя",
                 "consumes": [
                     "application/json"
@@ -131,16 +126,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Информация о черновике",
                         "schema": {
-                            "$ref": "#/definitions/ds.GenerationRequest"
-                        }
-                    },
-                    "401": {
-                        "description": "Пользователь не авторизован",
-                        "schema": {
-                            "type": "object",
-                            "additionalProperties": {
-                                "type": "string"
-                            }
+                            "$ref": "#/definitions/ds.DraftGenerationRequestsBriefInfo"
                         }
                     },
                     "500": {
@@ -1411,6 +1397,17 @@ const docTemplate = `{
                     "type": "string",
                     "maxLength": 100,
                     "minLength": 8
+                }
+            }
+        },
+        "ds.DraftGenerationRequestsBriefInfo": {
+            "type": "object",
+            "properties": {
+                "generationRequestId": {
+                    "type": "integer"
+                },
+                "turbinesCount": {
+                    "type": "integer"
                 }
             }
         },

@@ -1,5 +1,5 @@
 [Public]
-Host = "localhost"
+Host = "192.168.1.157"
 
 [Service]
 Host = "0.0.0.0"

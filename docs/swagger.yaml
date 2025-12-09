@@ -54,6 +54,13 @@ definitions:
     - login
     - password
     type: object
+  ds.DraftGenerationRequestsBriefInfo:
+    properties:
+      generationRequestId:
+        type: integer
+      turbinesCount:
+        type: integer
+    type: object
   ds.GenerationRequest:
     properties:
       calculated_generation_sum:
@@ -380,21 +387,13 @@ paths:
         "200":
           description: Информация о черновике
           schema:
-            $ref: '#/definitions/ds.GenerationRequest'
-        "401":
-          description: Пользователь не авторизован
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/ds.DraftGenerationRequestsBriefInfo'
         "500":
           description: Внутренняя ошибка сервера
           schema:
             additionalProperties:
               type: string
             type: object
-      security:
-      - JWT: []
       summary: Получение информации о черновике заявки
       tags:
       - Заявки расчета выработки
