@@ -1,8 +1,11 @@
 package services
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
-	"math"
+	"fmt"
+	"net/http"
 
 	"rip/internal/app/ds"
 	"rip/internal/app/repositories"
@@ -23,23 +26,6 @@ type GenerationRequestsService struct {
 	r *repositories.GenerationRequestRepository
 }
 
-func CalculateTurbineGeneration(avgVelocity float32, height uint16, alpha float32, power uint32, days uint) uint64 {
-	const (
-		optimalVelocity     = 12
-		cutoffVelocity      = 15
-		decreaseCoefficient = 0.4
-	)
-
-	velocityAtHeight := float64(avgVelocity) * math.Pow(float64(height)/10.0, float64(alpha))
-
-	generation := float64(power) *
-		math.Pow(velocityAtHeight/float64(optimalVelocity), 3) *
-		math.Exp(-decreaseCoefficient*velocityAtHeight/float64(cutoffVelocity)) *
-		24 * float64(days)
-
-	return uint64(generation)
-}
-
 func NewGenerationRequestsService(db *gorm.DB) *GenerationRequestsService {
 	return &GenerationRequestsService{
 		r: repositories.NewGenerationRequestRepository(db),
@@ -54,15 +40,61 @@ func (s *GenerationRequestsService) GetGenerationRequest(generationRequestId uin
 	return s.r.GetGenerationRequest(generationRequestId)
 }
 
+type TurbineCalcRequest struct {
+	TurbineID   uint    `json:"turbine_id"`
+	AvgVelocity float32 `json:"avg_velocity"`
+	Height      uint16  `json:"height"`
+	Alpha       float32 `json:"alpha"`
+	Power       uint32  `json:"power"`
+	Days        uint    `json:"days"`
+}
+
+func sendCalculationRequest(generationRequestId uint, turbines []TurbineCalcRequest) error {
+	body, _ := json.Marshal(turbines)
+	url := fmt.Sprintf("http://async-backend:80/calculate-generation/%d", generationRequestId)
+	resp, err := http.Post(url, "application/json", bytes.NewBuffer(body))
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+	return nil
+}
+
 func (s *GenerationRequestsService) CloseGenerationRequest(generationRequestId uint, userId uint, status string) (ds.GenerationRequest, error) {
 	switch status {
 	case "completed":
-		return s.r.CompleteGenerationRequest(generationRequestId, userId, CalculateTurbineGeneration)
+		generationRequest, err := s.r.CompleteGenerationRequest(generationRequestId, userId)
+
+		if err == nil {
+			turbinesCalcRequest := []TurbineCalcRequest{}
+
+			for _, turbine := range *generationRequest.TurbineGenerationRequests {
+				turbinesCalcRequest = append(turbinesCalcRequest, TurbineCalcRequest{
+					TurbineID:   turbine.TurbineID,
+					AvgVelocity: *turbine.AvgVelocity,
+					Height:      turbine.Turbine.Height,
+					Alpha:       *turbine.Alpha,
+					Power:       turbine.Turbine.Power,
+					Days:        *generationRequest.PeriodDays,
+				})
+			}
+
+			sendCalculationRequest(generationRequestId, turbinesCalcRequest)
+		}
+
+		return generationRequest, err
 	case "rejected":
 		return s.r.RejectGenerationRequest(generationRequestId, userId)
 	}
 
 	return ds.GenerationRequest{}, ErrorGenerationRequestIncorrectStatus
+}
+
+func (s *GenerationRequestsService) UpdateTurbineInGenerationRequest(generationRequestId uint, turbineId uint, calculatedGeneration int) error {
+	return s.r.UpdateTurbineInGenerationRequest(generationRequestId, turbineId, calculatedGeneration)
 }
 
 func (s *GenerationRequestsService) GetDraftBriefInfo(userId uint) (ds.DraftGenerationRequestsBriefInfo, error) {

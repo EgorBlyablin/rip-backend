@@ -8,6 +8,7 @@ import (
 	"rip/internal/app/repositories"
 	"rip/internal/app/services"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
@@ -28,7 +29,9 @@ func NewGenerationRequestsApi(s *services.GenerationRequestsService) *Generation
 func (a *GenerationRequestsApi) RegisterEndpoints(r *gin.RouterGroup, m *middlewares.UserMiddlewares) {
 	r.GET("/", m.WithAuth, a.GetSentGenerationRequests)
 	r.GET("/:generationRequestId/", m.WithAuth, a.GetGenerationRequest)
-	r.PUT("/:generationRequestId/close", m.WithModeratorAccess, a.CloseGenerationRequest)
+	r.PUT("/:generationRequestId/close/", m.WithModeratorAccess, a.CloseGenerationRequest)
+
+	r.PUT("/callback/:generationRequestId/", a.GenerationCallbackHandler)
 
 	r.GET("/draft/", m.WithOptionalAuth, a.GetDraftBriefInfo)
 	r.POST("/draft/:turbineId", m.WithAuth, a.AddTurbineToDraft)
@@ -37,6 +40,43 @@ func (a *GenerationRequestsApi) RegisterEndpoints(r *gin.RouterGroup, m *middlew
 	r.DELETE("/draft/:turbineId", m.WithAuth, a.RemoveTurbineFromDraft)
 	r.PUT("/draft/submit/", m.WithAuth, a.SubmitDraftGenerationRequest)
 	r.DELETE("/draft/", m.WithAuth, a.DeleteDraftGenerationRequest)
+}
+
+type GenerationCalcResponse struct {
+	TurbineID            uint  `json:"turbine_id"`
+	CalculatedGeneration int64 `json:"calculated_generation"`
+}
+
+func (a *GenerationRequestsApi) GenerationCallbackHandler(ctx *gin.Context) {
+	auth := ctx.GetHeader("Authorization")
+	if !strings.HasPrefix(auth, "Token ") {
+		log.Error("No Authorization header found")
+		ctx.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	auth = auth[len("Token "):]
+
+	if auth != "1234" {
+		ctx.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	generationRequestIdStr := ctx.Param("generationRequestId")
+	generationRequestId, _ := strconv.Atoi(generationRequestIdStr)
+
+	var results []GenerationCalcResponse
+	if err := ctx.ShouldBindJSON(&results); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// Здесь обновляем базу
+	for _, calcularionResult := range results {
+		a.s.UpdateTurbineInGenerationRequest(uint(generationRequestId), calcularionResult.TurbineID, int(calcularionResult.CalculatedGeneration))
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{"message": "updated"})
 }
 
 // @Summary Список заявок с фильтрацией
@@ -87,7 +127,16 @@ func (a *GenerationRequestsApi) GetSentGenerationRequests(ctx *gin.Context) {
 
 	for i := range generationRequests {
 		if generationRequests[i].Status == "completed" {
-			counter := uint(len(*generationRequests[i].TurbineGenerationRequests))
+			counter := uint(0)
+
+			for j := range len(*generationRequests[i].TurbineGenerationRequests) {
+				t := *generationRequests[i].TurbineGenerationRequests
+
+				if t[j].CalculatedGeneration != nil {
+					counter += 1
+				}
+			}
+
 			generationRequests[i].TurbineGenerationRequestsCount = &counter
 		}
 		generationRequests[i].TurbineGenerationRequests = nil

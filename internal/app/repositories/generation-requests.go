@@ -205,7 +205,7 @@ func (r *GenerationRequestRepository) UpdateDraftGenerationRequest(userId uint, 
 	return updatedGenerationRequest, nil
 }
 
-func (r *GenerationRequestRepository) CompleteGenerationRequest(generationRequestId uint, moderatorId uint, calculationFn func(avgVelocity float32, height uint16, alpha float32, power uint32, days uint) uint64) (ds.GenerationRequest, error) {
+func (r *GenerationRequestRepository) CompleteGenerationRequest(generationRequestId uint, moderatorId uint) (ds.GenerationRequest, error) {
 	generationRequest, err := r.GetGenerationRequest(generationRequestId)
 	if err != nil {
 		return ds.GenerationRequest{}, err
@@ -218,7 +218,6 @@ func (r *GenerationRequestRepository) CompleteGenerationRequest(generationReques
 	}
 
 	transaction := r.GenerationRequestDB.Begin()
-	transactionalService := NewGenerationRequestRepository(transaction)
 
 	now := time.Now()
 	if err := transaction.Where(&ds.GenerationRequest{
@@ -233,35 +232,24 @@ func (r *GenerationRequestRepository) CompleteGenerationRequest(generationReques
 		return ds.GenerationRequest{}, err
 	}
 
-	turbines, err := transactionalService.GetGenerationRequestTurbines(generationRequestId)
-	if err != nil {
-		transaction.Rollback()
-		return ds.GenerationRequest{}, err
-	}
-
-	for _, turbine := range turbines {
-		calculatedGeneration := calculationFn(
-			*turbine.AvgVelocity,
-			turbine.Turbine.Height,
-			*turbine.Alpha,
-			turbine.Turbine.Power,
-			*generationRequest.PeriodDays,
-		)
-
-		if err := transaction.Where(&ds.TurbineGenerationRequest{
-			TurbineID:           turbine.TurbineID,
-			GenerationRequestID: turbine.GenerationRequestID,
-		}).Updates(&ds.TurbineGenerationRequest{
-			CalculatedGeneration: &calculatedGeneration,
-		}).Error; err != nil {
-			log.WithError(err).WithFields(log.Fields{"Generation Request ID": generationRequestId}).Error("Failed to fill calculated generation in DB")
-			transaction.Rollback()
-			return ds.GenerationRequest{}, err
-		}
-	}
-
 	transaction.Commit()
 	return r.GetGenerationRequest(generationRequestId)
+}
+
+func (r *GenerationRequestRepository) UpdateTurbineInGenerationRequest(generationRequestId uint, turbineId uint, calculatedGeneration int) error {
+	calculatedGenerationPtr := uint64(calculatedGeneration)
+
+	if err := r.GenerationRequestDB.Where(&ds.TurbineGenerationRequest{
+		TurbineID:           turbineId,
+		GenerationRequestID: generationRequestId,
+	}).Updates(&ds.TurbineGenerationRequest{
+		CalculatedGeneration: &calculatedGenerationPtr,
+	}).Error; err != nil {
+		log.WithError(err).WithFields(log.Fields{"Generation Request ID": generationRequestId}).Error("Failed to fill calculated generation in DB")
+		return err
+	}
+
+	return nil
 }
 
 func (r *GenerationRequestRepository) RejectGenerationRequest(generationRequestId uint, moderatorId uint) (ds.GenerationRequest, error) {
