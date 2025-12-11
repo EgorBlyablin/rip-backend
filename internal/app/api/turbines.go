@@ -27,10 +27,10 @@ func (a *TurbinesApi) RegisterEndpoints(r *gin.RouterGroup, m *middlewares.UserM
 	r.GET("/", a.GetTurbines)
 
 	r.POST("/", m.WithModeratorAccess, a.CreateTurbine)
-	r.GET("/:turbineId", a.GetTurbine)
-	r.PUT("/:turbineId", m.WithModeratorAccess, a.UpdateTurbine)
-	r.POST("/:turbineId/upload-image", m.WithModeratorAccess, a.UploadTurbineImage)
-	r.DELETE("/:turbineId", m.WithModeratorAccess, a.DeleteTurbine)
+	r.GET("/:turbineId/", a.GetTurbine)
+	r.PUT("/:turbineId/", m.WithModeratorAccess, a.UpdateTurbine)
+	r.POST("/:turbineId/upload-image/", m.WithModeratorAccess, a.UploadTurbineImage)
+	r.DELETE("/:turbineId/", m.WithModeratorAccess, a.DeleteTurbine)
 }
 
 // @Summary Список турбин с фильтрацией

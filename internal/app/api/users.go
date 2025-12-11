@@ -27,8 +27,8 @@ func (a *UsersApi) RegisterEndpoints(r *gin.RouterGroup, m *middlewares.UserMidd
 	r.POST("/", a.RegisterUser)
 	r.GET("/", m.WithAuth, a.GetCurrentUser)
 	r.PUT("/", m.WithAuth, a.UpdateCurrentUser)
-	r.POST("/login", a.Login)
-	r.POST("/logout", m.WithAuth, a.Logout)
+	r.POST("/login/", a.Login)
+	r.POST("/logout/", m.WithAuth, a.Logout)
 }
 
 // @Summary Регистрация нового пользователя

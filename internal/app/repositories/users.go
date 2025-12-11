@@ -72,11 +72,11 @@ func (r *UsersRepository) CreateUser(user ds.CreateUser) (ds.User, error) {
 		Password: user.Password,
 	}
 
-	err := r.usersDB.Create(&newUser).Error
-	if errors.Is(err, gorm.ErrDuplicatedKey) {
+	if r.usersDB.First(&newUser).Error != nil {
 		return ds.User{}, ErrorLoginIsTaken
 	}
 
+	err := r.usersDB.Create(&newUser).Error
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"Login":    user.Login,

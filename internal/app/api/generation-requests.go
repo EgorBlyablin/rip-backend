@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	log "github.com/sirupsen/logrus"
+	"gorm.io/gorm"
 )
 
 type GenerationRequestsApi struct {
@@ -26,16 +27,16 @@ func NewGenerationRequestsApi(s *services.GenerationRequestsService) *Generation
 
 func (a *GenerationRequestsApi) RegisterEndpoints(r *gin.RouterGroup, m *middlewares.UserMiddlewares) {
 	r.GET("/", m.WithAuth, a.GetSentGenerationRequests)
-	r.GET("/:generationRequestId", m.WithAuth, a.GetGenerationRequest)
+	r.GET("/:generationRequestId/", m.WithAuth, a.GetGenerationRequest)
 	r.PUT("/:generationRequestId/close", m.WithModeratorAccess, a.CloseGenerationRequest)
 
-	r.GET("/draft", m.WithOptionalAuth, a.GetDraftBriefInfo)
+	r.GET("/draft/", m.WithOptionalAuth, a.GetDraftBriefInfo)
 	r.POST("/draft/:turbineId", m.WithAuth, a.AddTurbineToDraft)
-	r.PUT("/draft", m.WithAuth, a.UpdateDraftGenerationRequest)
+	r.PUT("/draft/", m.WithAuth, a.UpdateDraftGenerationRequest)
 	r.PUT("/draft/:turbineId", m.WithAuth, a.UpdateTurbineInDraft)
 	r.DELETE("/draft/:turbineId", m.WithAuth, a.RemoveTurbineFromDraft)
-	r.PUT("/draft/submit", m.WithAuth, a.SubmitDraftGenerationRequest)
-	r.DELETE("/draft", m.WithAuth, a.DeleteDraftGenerationRequest)
+	r.PUT("/draft/submit/", m.WithAuth, a.SubmitDraftGenerationRequest)
+	r.DELETE("/draft/", m.WithAuth, a.DeleteDraftGenerationRequest)
 }
 
 // @Summary Список заявок с фильтрацией
@@ -205,6 +206,7 @@ func (a *GenerationRequestsApi) CloseGenerationRequest(ctx *gin.Context) {
 // @Tags Заявки расчета выработки
 // @Accept json
 // @Produce json
+// @Security JWT
 // @Success 200 {object} ds.DraftGenerationRequestsBriefInfo "Информация о черновике"
 // @Failure 500 {object} map[string]string "Внутренняя ошибка сервера"
 // @Router /api/generation-requests/draft/ [get]
@@ -220,7 +222,7 @@ func (a *GenerationRequestsApi) GetDraftBriefInfo(ctx *gin.Context) {
 
 	generationRequestDraftBriefInfo, err := a.s.GetDraftBriefInfo(userId)
 	if err != nil {
-		if errors.Is(err, repositories.ErrorGenerationRequestNotFound) {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			ctx.AbortWithStatusJSON(http.StatusOK, ds.DraftGenerationRequestsBriefInfo{
 				GenerationRequestId: 0,
 				TurbinesCount:       0,

@@ -26,7 +26,7 @@ func (a *TurbinesApplication) Run(config *config.Config, db *gorm.DB, redis *red
 	engine := gin.Default()
 
 	engine.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{
+		AllowOrigins: []string{
 			"https://egorblyablin.github.io",
 			"https://10.185.38.237:3000",
 			"https://localhost:3000",

@@ -11,22 +11,21 @@ type GenerationRequest struct {
 
 	CreatedByID    uint       `gorm:"not null" json:"-"`
 	CreatedBy      User       `json:"-"`
-	CreatedByLogin string     `json:"created_by"`
+	CreatedByLogin string     `gorm:"-" json:"created_by"`
 	CreatedAt      time.Time  `gorm:"not null" json:"created_at"`
 	FormedAt       *time.Time `json:"formed_at"`
 
 	ClosedByID    *uint      `json:"-"`
 	ClosedBy      *User      `json:"-"`
-	ClosedByLogin *string    `json:"closed_by"`
+	ClosedByLogin *string    `gorm:"-" json:"closed_by"`
 	ClosedAt      *time.Time `json:"closed_at"`
 
 	PeriodDays *uint `gorm:"check:(period_days > 0)" json:"period_days"`
 
 	TurbineGenerationRequests      *[]TurbineGenerationRequest `json:"turbine_generation_requests,omitempty"`
 	TurbineGenerationRequestsCount *uint                       `gorm:"-" json:"turbine_generation_requests_count"`
-	CalculatedGenerationSum        *uint64                     `json:"calculated_generation_sum,omitempty"`
+	CalculatedGenerationSum        *uint64                     `gorm:"-" json:"calculated_generation_sum,omitempty"`
 }
-
 
 func (generationRequest GenerationRequest) MarshalJSON() ([]byte, error) {
 	type Alias GenerationRequest
@@ -52,6 +51,6 @@ type UpdateGenerationRequest struct {
 }
 
 type DraftGenerationRequestsBriefInfo struct {
-	GenerationRequestId uint
-	TurbinesCount       uint
+	GenerationRequestId uint `json:"generationRequestId"`
+	TurbinesCount       uint `json:"turbinesCount"`
 }

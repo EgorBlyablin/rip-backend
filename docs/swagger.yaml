@@ -394,6 +394,8 @@ paths:
             additionalProperties:
               type: string
             type: object
+      security:
+      - JWT: []
       summary: Получение информации о черновике заявки
       tags:
       - Заявки расчета выработки

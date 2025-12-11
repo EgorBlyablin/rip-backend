@@ -294,12 +294,6 @@ func (r *GenerationRequestRepository) GetDraftGenerationRequest(userId uint) (ds
 		CreatedByID: userId,
 		Status:      "draft",
 	}).Preload("TurbineGenerationRequests.Turbine").First(&generationRequest).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return ds.GenerationRequest{}, ErrorGenerationRequestNotFound
-		}
-		log.WithError(err).WithFields(log.Fields{
-			"User ID": userId,
-		}).Errorf("Failed to get draft generation request from DB")
 		return ds.GenerationRequest{}, err
 	}
 	return generationRequest, nil

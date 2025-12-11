@@ -23,7 +23,7 @@ type Turbine struct {
 	Title       string  `gorm:"type:varchar(100);not null" json:"title"`
 	Description string  `gorm:"type:text;not null" json:"description"`
 	IsActive    bool    `gorm:"default:1;not null" json:"is_active"`
-	Image       *string `gorm:"type:varchar(100)" json:"-"`
+	Image       *string `gorm:"type:varchar(100)" json:"Image"`
 
 	Power  uint32 `gorm:"check:power > 0;not null" json:"power"`
 	Height uint16 `gorm:"check:height > 0;not null" json:"height"`
@@ -82,7 +82,7 @@ func (turbine Turbine) MarshalJSON() ([]byte, error) {
 	type Alias Turbine
 	return json.Marshal(&struct {
 		Alias
-		Image string `json:"image"`
+		Image string `json:"Image"`
 	}{
 		Alias: (Alias)(turbine),
 		Image: turbine.ImageSrc(),
@@ -101,7 +101,7 @@ type CreateTurbine struct {
 type UpdateTurbine struct {
 	Title       *string `json:"title" binding:"omitnil,min=3,max=100"`
 	Description *string `json:"description" binding:"omitnil,min=10"`
-	IsActive    *bool
+	IsActive    *bool   `json:"is_active"`
 	Image       *string
 
 	Power  *uint32 `json:"power" binding:"omitnil,gt=0"`

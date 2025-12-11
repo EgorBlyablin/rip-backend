@@ -111,6 +111,11 @@ const docTemplate = `{
         },
         "/api/generation-requests/draft/": {
             "get": {
+                "security": [
+                    {
+                        "JWT": []
+                    }
+                ],
                 "description": "Возвращает информацию о черновике заявки текущего пользователя",
                 "consumes": [
                     "application/json"
